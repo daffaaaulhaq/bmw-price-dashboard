@@ -452,13 +452,12 @@ fig_line = px.line(
     markers=True,
     labels={'Price_Converted': 'Harga Rata-rata', 'Year': 'Tahun'},
     template='plotly_white',
-    line_shape='spline',  # Membuat garis melengkung/flowy
     color_discrete_sequence=bmw_colors  # Warna BMW
 )
 
-# Update traces dengan fill area (bayangan di bawah garis)
+# Update traces dengan garis tajam (linear)
 fig_line.update_traces(
-    line=dict(width=3, shape='spline'),  # Garis melengkung dengan lebar 3
+    line=dict(width=3),  # Garis lurus dengan lebar 3
     marker=dict(size=8),
     fill='tonexty',  # Fill area di bawah garis
     fillcolor='rgba(28, 105, 212, 0.1)'  # Warna biru BMW dengan transparansi
@@ -593,167 +592,129 @@ if not actual_data.empty:
         model_analysis_stable = sorted(model_analysis, key=lambda x: x['volatility'])
         most_stable_model = model_analysis_stable[0]
         
-        # Layout 2 kolom untuk insight cards
-        insight_col1, insight_col2 = st.columns(2)
+        # Layout 4 kolom untuk insight cards - format paragraf
+        insight_cols = st.columns(4)
         
-        with insight_col1:
-            # Card 1: Model Terbaik
+        # Card 1: Model Terbaik
+        with insight_cols[0]:
             if best_model['trend_pct'] > 5:
                 st.markdown(f"""
                 <div style='background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); 
-                            padding: 25px; border-radius: 15px; 
-                            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                            border-left: 5px solid #22c55e; margin-bottom: 20px;'>
-                    <h3 style='color: #15803d; margin-top: 0;'>📈 Model Terbaik</h3>
-                    <h2 style='color: #166534; margin: 10px 0;'>{best_model['model']}</h2>
-                    <p style='font-size: 16px; color: #166534; line-height: 1.6;'>
-                        Performa luar biasa dengan kenaikan <strong>{best_model['trend_pct']:.1f}%</strong> 
-                        dalam beberapa tahun terakhir.
+                            padding: 20px; border-radius: 12px; 
+                            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+                            border-top: 4px solid #22c55e; height: 200px;'>
+                    <p style='color: #15803d; margin: 0 0 12px 0; font-size: 14px; font-weight: 600; text-align: center;'>
+                        📈 Model Terbaik
                     </p>
-                    <p style='font-size: 18px; font-weight: 600; color: #15803d; margin: 15px 0;'>
-                        Harga saat ini: {format_currency(convert_currency(best_model['current_avg'], selected_currency), selected_currency)}
+                    <p style='color: #166534; margin: 0; font-size: 14px; line-height: 1.7; text-align: justify;'>
+                        <strong style='font-size: 18px; display: block; text-align: center; margin-bottom: 8px;'>{best_model['model']}</strong>
+                        menunjukkan performa luar biasa dengan kenaikan <strong>{best_model['trend_pct']:.1f}%</strong> dalam beberapa tahun terakhir. 
+                        Sangat cocok untuk investasi jangka panjang dengan potensi keuntungan yang menjanjikan.
                     </p>
-                    <div style='background-color: rgba(255,255,255,0.7); padding: 15px; border-radius: 10px; margin-top: 15px;'>
-                        <p style='margin: 0; color: #166534; font-weight: 500;'>
-                            ✅ <strong>Rekomendasi:</strong> Sangat bagus untuk investasi jangka panjang. 
-                            Tren menunjukkan permintaan tinggi dan nilai yang terus meningkat.
-                        </p>
-                    </div>
                 </div>
                 """, unsafe_allow_html=True)
             elif best_model['trend_pct'] > 0:
                 st.markdown(f"""
                 <div style='background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); 
-                            padding: 25px; border-radius: 15px; 
-                            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                            border-left: 5px solid #3b82f6; margin-bottom: 20px;'>
-                    <h3 style='color: #1e40af; margin-top: 0;'>📊 Model Stabil</h3>
-                    <h2 style='color: #1e3a8a; margin: 10px 0;'>{best_model['model']}</h2>
-                    <p style='font-size: 16px; color: #1e3a8a; line-height: 1.6;'>
-                        Pertumbuhan stabil dengan kenaikan <strong>{best_model['trend_pct']:.1f}%</strong>.
+                            padding: 20px; border-radius: 12px; 
+                            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+                            border-top: 4px solid #3b82f6; height: 200px;'>
+                    <p style='color: #1e40af; margin: 0 0 12px 0; font-size: 14px; font-weight: 600; text-align: center;'>
+                        📊 Model Stabil
                     </p>
-                    <p style='font-size: 18px; font-weight: 600; color: #1e40af; margin: 15px 0;'>
-                        Harga saat ini: {format_currency(convert_currency(best_model['current_avg'], selected_currency), selected_currency)}
+                    <p style='color: #1e3a8a; margin: 0; font-size: 14px; line-height: 1.7; text-align: justify;'>
+                        <strong style='font-size: 18px; display: block; text-align: center; margin-bottom: 8px;'>{best_model['model']}</strong>
+                        menunjukkan pertumbuhan stabil dengan kenaikan <strong>{best_model['trend_pct']:.1f}%</strong>. 
+                        Pilihan yang aman dengan risiko rendah untuk investor yang mengutamakan stabilitas.
                     </p>
-                    <div style='background-color: rgba(255,255,255,0.7); padding: 15px; border-radius: 10px; margin-top: 15px;'>
-                        <p style='margin: 0; color: #1e3a8a; font-weight: 500;'>
-                            ✅ <strong>Rekomendasi:</strong> Cocok untuk investasi yang aman dengan risiko rendah.
-                        </p>
-                    </div>
                 </div>
                 """, unsafe_allow_html=True)
-            
-            # Card 3: Model Paling Stabil
-            st.markdown(f"""
-            <div style='background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); 
-                        padding: 25px; border-radius: 15px; 
-                        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                        border-left: 5px solid #f59e0b; margin-bottom: 20px;'>
-                <h3 style='color: #92400e; margin-top: 0;'>🛡️ Model Paling Stabil</h3>
-                <h2 style='color: #78350f; margin: 10px 0;'>{most_stable_model['model']}</h2>
-                <p style='font-size: 16px; color: #78350f; line-height: 1.6;'>
-                    Volatilitas harga terendah - harga lebih konsisten dan dapat diprediksi.
-                </p>
-                <div style='background-color: rgba(255,255,255,0.7); padding: 15px; border-radius: 10px; margin-top: 15px;'>
-                    <p style='margin: 0; color: #78350f; font-weight: 500;'>
-                        ✅ <strong>Keuntungan:</strong> Jika Anda membeli dan menjual kembali, 
-                        harga tidak akan turun terlalu jauh karena permintaan pasar yang stabil.
-                    </p>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
         
-        with insight_col2:
-            # Card 2: Prediksi Masa Depan
+        # Card 2: Prediksi Masa Depan
+        with insight_cols[1]:
             if best_future_model['future_trend_pct'] > 3:
                 st.markdown(f"""
                 <div style='background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); 
-                            padding: 25px; border-radius: 15px; 
-                            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                            border-left: 5px solid #6366f1; margin-bottom: 20px;'>
-                    <h3 style='color: #3730a3; margin-top: 0;'>🔮 Prediksi Terbaik</h3>
-                    <h2 style='color: #312e81; margin: 10px 0;'>{best_future_model['model']}</h2>
-                    <p style='font-size: 16px; color: #312e81; line-height: 1.6;'>
-                        Diprediksi mengalami kenaikan harga sebesar <strong>{best_future_model['future_trend_pct']:.1f}%</strong> 
-                        di masa depan.
+                            padding: 20px; border-radius: 12px; 
+                            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+                            border-top: 4px solid #6366f1; height: 200px;'>
+                    <p style='color: #3730a3; margin: 0 0 12px 0; font-size: 14px; font-weight: 600; text-align: center;'>
+                        🔮 Prediksi Terbaik
                     </p>
-                    <div style='background-color: rgba(255,255,255,0.7); padding: 15px; border-radius: 10px; margin-top: 15px;'>
-                        <p style='margin: 0; color: #312e81; font-weight: 500;'>
-                            💡 <strong>Strategi:</strong> Waktu yang <strong>TEPAT UNTUK MEMBELI</strong>! 
-                            Jika Anda membeli sekarang dan menjual kembali dalam 2-3 tahun, 
-                            potensi keuntungan sangat tinggi dengan risiko penurunan harga yang minimal.
-                        </p>
-                    </div>
+                    <p style='color: #312e81; margin: 0; font-size: 14px; line-height: 1.7; text-align: justify;'>
+                        <strong style='font-size: 18px; display: block; text-align: center; margin-bottom: 8px;'>{best_future_model['model']}</strong>
+                        diprediksi mengalami kenaikan harga sebesar <strong>+{best_future_model['future_trend_pct']:.1f}%</strong> di masa depan. 
+                        Ini adalah waktu yang tepat untuk membeli dengan potensi keuntungan tinggi.
+                    </p>
                 </div>
                 """, unsafe_allow_html=True)
             elif best_future_model['future_trend_pct'] < -3:
                 st.markdown(f"""
                 <div style='background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); 
-                            padding: 25px; border-radius: 15px; 
-                            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                            border-left: 5px solid #ef4444; margin-bottom: 20px;'>
-                    <h3 style='color: #991b1b; margin-top: 0;'>⚠️ Perhatian</h3>
-                    <h2 style='color: #7f1d1d; margin: 10px 0;'>{best_future_model['model']}</h2>
-                    <p style='font-size: 16px; color: #7f1d1d; line-height: 1.6;'>
-                        Diprediksi mengalami penurunan harga sekitar <strong>{abs(best_future_model['future_trend_pct']):.1f}%</strong> 
-                        di masa depan.
+                            padding: 20px; border-radius: 12px; 
+                            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+                            border-top: 4px solid #ef4444; height: 200px;'>
+                    <p style='color: #991b1b; margin: 0 0 12px 0; font-size: 14px; font-weight: 600; text-align: center;'>
+                        ⚠️ Perhatian
                     </p>
-                    <div style='background-color: rgba(255,255,255,0.7); padding: 15px; border-radius: 10px; margin-top: 15px;'>
-                        <p style='margin: 0; color: #7f1d1d; font-weight: 500;'>
-                            💡 <strong>Strategi:</strong> Jika Anda memiliki model ini, 
-                            pertimbangkan untuk <strong>MENJUAL SEKARANG</strong> sebelum harga turun lebih jauh.
-                        </p>
-                    </div>
+                    <p style='color: #7f1d1d; margin: 0; font-size: 14px; line-height: 1.7; text-align: justify;'>
+                        <strong style='font-size: 18px; display: block; text-align: center; margin-bottom: 8px;'>{best_future_model['model']}</strong>
+                        diprediksi mengalami penurunan harga sekitar <strong>{best_future_model['future_trend_pct']:.1f}%</strong>. 
+                        Pertimbangkan untuk menjual sekarang sebelum harga turun lebih jauh.
+                    </p>
                 </div>
                 """, unsafe_allow_html=True)
             else:
                 st.markdown(f"""
                 <div style='background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); 
-                            padding: 25px; border-radius: 15px; 
-                            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                            border-left: 5px solid #6366f1; margin-bottom: 20px;'>
-                    <h3 style='color: #3730a3; margin-top: 0;'>📊 Stabilitas Harga</h3>
-                    <h2 style='color: #312e81; margin: 10px 0;'>{best_future_model['model']}</h2>
-                    <p style='font-size: 16px; color: #312e81; line-height: 1.6;'>
-                        Diprediksi akan mempertahankan harga yang relatif stabil 
-                        (perubahan: <strong>{best_future_model['future_trend_pct']:+.1f}%</strong>).
+                            padding: 20px; border-radius: 12px; 
+                            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+                            border-top: 4px solid #6366f1; height: 200px;'>
+                    <p style='color: #3730a3; margin: 0 0 12px 0; font-size: 14px; font-weight: 600; text-align: center;'>
+                        📊 Stabilitas Harga
                     </p>
-                    <div style='background-color: rgba(255,255,255,0.7); padding: 15px; border-radius: 10px; margin-top: 15px;'>
-                        <p style='margin: 0; color: #312e81; font-weight: 500;'>
-                            💡 <strong>Strategi:</strong> Model ini cocok untuk <strong>HOLD</strong> (tahan). 
-                            Tidak ada urgensi untuk membeli atau menjual.
-                        </p>
-                    </div>
+                    <p style='color: #312e81; margin: 0; font-size: 14px; line-height: 1.7; text-align: justify;'>
+                        <strong style='font-size: 18px; display: block; text-align: center; margin-bottom: 8px;'>{best_future_model['model']}</strong>
+                        diprediksi akan mempertahankan harga yang relatif stabil dengan perubahan <strong>{best_future_model['future_trend_pct']:+.1f}%</strong>. 
+                        Cocok untuk strategi HOLD tanpa urgensi untuk membeli atau menjual.
+                    </p>
                 </div>
                 """, unsafe_allow_html=True)
-            
-            # Card 4: Perbandingan Performa
+        
+        # Card 3: Model Paling Stabil
+        with insight_cols[2]:
+            st.markdown(f"""
+            <div style='background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); 
+                        padding: 20px; border-radius: 12px; 
+                        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+                        border-top: 4px solid #f59e0b; height: 200px;'>
+                <p style='color: #92400e; margin: 0 0 12px 0; font-size: 14px; font-weight: 600; text-align: center;'>
+                    🛡️ Paling Stabil
+                </p>
+                <p style='color: #78350f; margin: 0; font-size: 14px; line-height: 1.7; text-align: justify;'>
+                    <strong style='font-size: 18px; display: block; text-align: center; margin-bottom: 8px;'>{most_stable_model['model']}</strong>
+                    memiliki volatilitas harga terendah, artinya harga lebih konsisten dan dapat diprediksi. 
+                    Ideal untuk investor yang menghindari fluktuasi harga yang ekstrem.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Card 4: Perbandingan Performa
+        with insight_cols[3]:
             if len(model_analysis) > 1:
                 st.markdown(f"""
                 <div style='background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); 
-                            padding: 25px; border-radius: 15px; 
-                            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                            border-left: 5px solid #ec4899; margin-bottom: 20px;'>
-                    <h3 style='color: #831843; margin-top: 0;'>⚖️ Perbandingan Performa</h3>
-                    <div style='background-color: rgba(255,255,255,0.7); padding: 15px; border-radius: 10px; margin-top: 15px;'>
-                        <p style='margin: 5px 0; color: #831843; font-size: 15px;'>
-                            <strong>🏆 Terbaik:</strong> {best_model['model']} 
-                            <span style='color: #15803d; font-weight: 600;'>({best_model['trend_pct']:+.1f}%)</span>
-                        </p>
-                        <p style='margin: 5px 0; color: #831843; font-size: 15px;'>
-                            <strong>📉 Terlemah:</strong> {worst_model['model']} 
-                            <span style='color: #991b1b; font-weight: 600;'>({worst_model['trend_pct']:+.1f}%)</span>
-                        </p>
-                        <p style='margin: 5px 0; color: #831843; font-size: 15px;'>
-                            <strong>📊 Selisih:</strong> {abs(best_model['trend_pct'] - worst_model['trend_pct']):.1f}%
-                        </p>
-                    </div>
-                    <div style='background-color: rgba(255,255,255,0.7); padding: 15px; border-radius: 10px; margin-top: 15px;'>
-                        <p style='margin: 0; color: #831843; font-weight: 500;'>
-                            💡 <strong>Kesimpulan:</strong> Ada perbedaan signifikan dalam performa antar model. 
-                            Pilih model dengan cermat berdasarkan tujuan investasi Anda.
-                        </p>
-                    </div>
+                            padding: 20px; border-radius: 12px; 
+                            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+                            border-top: 4px solid #ec4899; height: 200px;'>
+                    <p style='color: #831843; margin: 0 0 12px 0; font-size: 14px; font-weight: 600; text-align: center;'>
+                        ⚖️ Perbandingan
+                    </p>
+                    <p style='color: #831843; margin: 0; font-size: 14px; line-height: 1.7; text-align: justify;'>
+                        Model terbaik <strong>{best_model['model']}</strong> tumbuh <strong style='color: #15803d;'>{best_model['trend_pct']:+.1f}%</strong>, 
+                        sementara <strong>{worst_model['model']}</strong> hanya <strong style='color: #991b1b;'>{worst_model['trend_pct']:+.1f}%</strong>. 
+                        Perbedaan performa yang signifikan menunjukkan pentingnya pemilihan model yang tepat.
+                    </p>
                 </div>
                 """, unsafe_allow_html=True)
     else:
