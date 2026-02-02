@@ -440,6 +440,30 @@ trend_data['Price_Converted'] = trend_data['Price_USD'].apply(
     lambda x: convert_currency(x, selected_currency)
 )
 
+# Hitung persentase perubahan untuk setiap model
+trend_data = trend_data.sort_values(['Model', 'Year'])
+trend_data['Pct_Change'] = trend_data.groupby('Model')['Price_Converted'].pct_change() * 100
+trend_data['Pct_Change'] = trend_data['Pct_Change'].fillna(0)  # Tahun pertama = 0%
+
+# Tambahkan kolom warna untuk persentase
+def get_pct_color(pct):
+    if pct > 0:
+        return '#22c55e'  # Hijau untuk naik
+    elif pct < 0:
+        return '#ef4444'  # Merah untuk turun
+    else:
+        return '#6b7280'  # Abu-abu untuk 0%
+
+trend_data['Pct_Color'] = trend_data['Pct_Change'].apply(get_pct_color)
+
+# Format persentase dengan warna
+def format_pct_with_color(row):
+    pct = row['Pct_Change']
+    color = row['Pct_Color']
+    return f'<span style="color: {color}; font-weight: bold;">{pct:+.1f}%</span>'
+
+trend_data['Pct_Formatted'] = trend_data.apply(format_pct_with_color, axis=1)
+
 # Buat line chart dengan warna BMW blue
 # Palet warna BMW: biru, abu-abu gelap, putih
 bmw_colors = ['#1C69D4', '#0E4C92', '#00A1E4', '#6C757D', '#2C5F9E', '#4A90E2']
@@ -452,15 +476,20 @@ fig_line = px.line(
     markers=True,
     labels={'Price_Converted': 'Harga Rata-rata', 'Year': 'Tahun'},
     template='plotly_white',
-    color_discrete_sequence=bmw_colors  # Warna BMW
+    color_discrete_sequence=bmw_colors,  # Warna BMW
+    custom_data=['Pct_Formatted']  # Tambahkan persentase terformat ke custom data
 )
 
-# Update traces dengan garis tajam (linear)
+# Update traces dengan garis tajam (linear) dan custom hover template
 fig_line.update_traces(
     line=dict(width=3),  # Garis lurus dengan lebar 3
     marker=dict(size=8),
     fill='tonexty',  # Fill area di bawah garis
-    fillcolor='rgba(28, 105, 212, 0.1)'  # Warna biru BMW dengan transparansi
+    fillcolor='rgba(28, 105, 212, 0.1)',  # Warna biru BMW dengan transparansi
+    hovertemplate='<b>%{fullData.name}</b><br>' +
+                  'Harga: ' + format_currency(1, selected_currency).replace('1', '%{y:,.0f}') + '<br>' +
+                  'Perubahan: %{customdata[0]}' +
+                  '<extra></extra>'
 )
 
 # Set fill untuk trace pertama ke 'tozeroy'
@@ -506,7 +535,7 @@ y_axis_min = max(0, y_min - y_padding)  # Minimal 0
 y_axis_max = y_max + y_padding
 
 fig_line.update_layout(
-    hovermode='x unified',
+    hovermode='x unified',  # Kembali ke 'x unified' agar semua model muncul sekaligus
     height=400,
     font=dict(size=12),
     legend=dict(
@@ -531,6 +560,7 @@ fig_line.update_layout(
 
 st.plotly_chart(fig_line, use_container_width=True)
 st.markdown('</div>', unsafe_allow_html=True)  # Tutup container grafik
+
 
 # ========================================
 # BARIS 4: ANALISIS PASAR & REKOMENDASI INVESTASI
